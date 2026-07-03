@@ -1,0 +1,53 @@
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectModel } from '@nestjs/sequelize';
+import { EmailTemplate } from '../../../models/template.model';
+import { CreateTemplateDto } from '../dto/create-template.dto';
+import { UpdateTemplateDto } from '../dto/update-template.dto';
+
+@Injectable()
+export class TemplateDao {
+  constructor(
+    @InjectModel(EmailTemplate)
+    private readonly emailTemplateModel: typeof EmailTemplate,
+  ) {}
+
+  async create(createTemplateDto: CreateTemplateDto): Promise<EmailTemplate> {
+    return this.emailTemplateModel.create({
+      ...createTemplateDto,
+    } as any);
+  }
+
+  async findAll(filter: any = {}): Promise<EmailTemplate[]> {
+    return this.emailTemplateModel.findAll({
+      where: {
+        isActive: true,
+        ...filter,
+      },
+    });
+  }
+
+  async findById(id: number): Promise<EmailTemplate> {
+    const template = await this.emailTemplateModel.findOne({
+      where: { id, isActive: true },
+    });
+    
+    if (!template) {
+      throw new NotFoundException(`Template with ID ${id} not found`);
+    }
+    
+    return template;
+  }
+
+  async update(id: number, updateTemplateDto: UpdateTemplateDto): Promise<EmailTemplate> {
+    const template = await this.findById(id);
+    
+    return template.update(updateTemplateDto);
+  }
+
+  async delete(id: number): Promise<void> {
+    const template = await this.findById(id);
+    
+    // Soft delete logic as requested
+    await template.update({ isActive: false });
+  }
+}
