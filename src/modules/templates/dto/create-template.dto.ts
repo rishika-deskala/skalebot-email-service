@@ -15,7 +15,7 @@ export class CreateTemplateDto {
 
   @IsObject()
   @IsOptional()
-  variables?: object;
+  variables?: Record<string, any>;
 
   @IsInt()
   @IsNotEmpty()
@@ -29,11 +29,4 @@ export class CreateTemplateDto {
   @IsOptional()
   isActive?: boolean;
 
-  @IsInt()
-  @IsOptional()
-  createdBy?: number;
-
-  @IsInt()
-  @IsOptional()
-  updatedBy?: number;
 }
