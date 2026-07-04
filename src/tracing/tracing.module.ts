@@ -11,16 +11,22 @@ import type { TraceStore } from './trace-store';
 import { NodeSDK } from '@opentelemetry/sdk-node';
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
 import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentations-node';
-import { defaultResource, resourceFromAttributes } from '@opentelemetry/resources';
-import { ATTR_SERVICE_NAME, ATTR_SERVICE_VERSION } from '@opentelemetry/semantic-conventions';
+import {
+  defaultResource,
+  resourceFromAttributes,
+} from '@opentelemetry/resources';
+import {
+  ATTR_SERVICE_NAME,
+  ATTR_SERVICE_VERSION,
+} from '@opentelemetry/semantic-conventions';
 
 export type TracingConfig = {
-  serviceName?: string;           // OTEL_SERVICE_NAME (env) takes precedence if present
+  serviceName?: string; // OTEL_SERVICE_NAME (env) takes precedence if present
   serviceVersion?: string;
-  otlpEndpoint?: string;          // full URL; will be coerced to end with /v1/traces
+  otlpEndpoint?: string; // full URL; will be coerced to end with /v1/traces
   otlpHeaders?: Record<string, string>; // e.g. { Authorization: 'Basic ...' }
-  chainIdHeader?: string;         // default: x-chain-id
-  ttlMs?: number;                 // in-memory request snapshot TTL
+  chainIdHeader?: string; // default: x-chain-id
+  ttlMs?: number; // in-memory request snapshot TTL
 };
 
 export const TRACE_STORE_TOKEN = 'TRACE_STORE';
@@ -30,12 +36,15 @@ function parseHeadersEnv(h?: string): Record<string, string> | undefined {
   if (!h) return undefined;
   // Example: "Authorization=Basic abc123,Another=xyz"
   return Object.fromEntries(
-    h.split(',')
+    h
+      .split(',')
       .map((p) => p.trim())
       .filter(Boolean)
       .map((p) => {
         const i = p.indexOf('=');
-        return i > 0 ? [p.slice(0, i).trim(), p.slice(i + 1).trim()] : [p.trim(), ''];
+        return i > 0
+          ? [p.slice(0, i).trim(), p.slice(i + 1).trim()]
+          : [p.trim(), ''];
       }),
   );
 }
@@ -53,7 +62,8 @@ function resolveTracesEndpoint(cfg?: string): string | undefined {
   const envBase = process.env.OTEL_EXPORTER_OTLP_ENDPOINT;
   console.log(envTraces);
   console.log(envBase);
-  const url = cfg ?? envTraces ?? (envBase ? joinUrl(envBase, '/v1/traces') : undefined);
+  const url =
+    cfg ?? envTraces ?? (envBase ? joinUrl(envBase, '/v1/traces') : undefined);
   if (!url) return undefined;
   return /\/v1\/traces\/?$/.test(url) ? url : joinUrl(url, '/v1/traces');
 }
@@ -69,21 +79,27 @@ export class TracingModule {
       process.env.SERVICE_NAME ??
       'nestjs-api';
 
-    const serviceVersion = cfg.serviceVersion ?? process.env.SERVICE_VERSION ?? '0.0.1';
+    const serviceVersion =
+      cfg.serviceVersion ?? process.env.SERVICE_VERSION ?? '0.0.1';
 
     const otlpEndpoint = resolveTracesEndpoint(cfg.otlpEndpoint);
     const otlpHeaders =
-      cfg.otlpHeaders ?? parseHeadersEnv(process.env.OTEL_EXPORTER_OTLP_HEADERS);
-    
-    const chainIdHeader = cfg.chainIdHeader ?? process.env.CHAIN_ID_HEADER ?? 'x-chain-id';
-    const ttlMs = cfg.ttlMs ?? Number(process.env.TRACE_TTL_MS ?? 15 * 60 * 1000);
+      cfg.otlpHeaders ??
+      parseHeadersEnv(process.env.OTEL_EXPORTER_OTLP_HEADERS);
+
+    const chainIdHeader =
+      cfg.chainIdHeader ?? process.env.CHAIN_ID_HEADER ?? 'x-chain-id';
+    const ttlMs =
+      cfg.ttlMs ?? Number(process.env.TRACE_TTL_MS ?? 15 * 60 * 1000);
 
     // Exporter (OTLP/HTTP). If no endpoint, SDK still starts but won't export.
     const traceExporter = otlpEndpoint
       ? new OTLPTraceExporter({ url: otlpEndpoint, headers: otlpHeaders })
       : undefined;
 
-    console.log(traceExporter ? `Tracing to ${otlpEndpoint}` : 'Tracing disabled');
+    console.log(
+      traceExporter ? `Tracing to ${otlpEndpoint}` : 'Tracing disabled',
+    );
 
     // Build resource without deprecated enums or Resource constructor
     const resource = defaultResource().merge(

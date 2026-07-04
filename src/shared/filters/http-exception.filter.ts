@@ -28,7 +28,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
     if (exception instanceof HttpException) {
       status = exception.getStatus();
       const exceptionResponse = exception.getResponse();
-      
+
       if (typeof exceptionResponse === 'string') {
         message = exceptionResponse;
       } else if (typeof exceptionResponse === 'object') {
@@ -68,7 +68,10 @@ export class AllExceptionsFilter implements ExceptionFilter {
         'x-real-ip': request.get('x-real-ip'),
       },
       query: Object.keys(request.query).length > 0 ? request.query : undefined,
-      body: request.method !== 'GET' && Object.keys(request.body || {}).length > 0 ? request.body : undefined,
+      body:
+        request.method !== 'GET' && Object.keys(request.body || {}).length > 0
+          ? request.body
+          : undefined,
       stackTrace: stack, // Include stack in logs for NewRelic
     };
 
@@ -76,7 +79,9 @@ export class AllExceptionsFilter implements ExceptionFilter {
     if (this.logger) {
       this.logger.error(logData, 'AllExceptionsFilter');
     } else {
-      console.error(`[${timestamp}] ${method} ${endpoint} - ${error}: ${message}`);
+      console.error(
+        `[${timestamp}] ${method} ${endpoint} - ${error}: ${message}`,
+      );
       console.error(`Client IP: ${clientIp}, User-Agent: ${userAgent}`);
       if (stack) {
         console.error(stack);
@@ -104,25 +109,30 @@ export class AllExceptionsFilter implements ExceptionFilter {
     const xRealIp = request.get('x-real-ip');
     const cfConnectingIp = request.get('cf-connecting-ip'); // Cloudflare
     const xClientIp = request.get('x-client-ip');
-    
+
     if (xForwardedFor) {
       // X-Forwarded-For can contain multiple IPs, the first one is the client
       return xForwardedFor.split(',')[0].trim();
     }
-    
+
     if (xRealIp) {
       return xRealIp;
     }
-    
+
     if (cfConnectingIp) {
       return cfConnectingIp;
     }
-    
+
     if (xClientIp) {
       return xClientIp;
     }
-    
+
     // Fallback to req.ip (Express default)
-    return request.ip || request.connection?.remoteAddress || request.socket?.remoteAddress || 'Unknown';
+    return (
+      request.ip ||
+      request.connection?.remoteAddress ||
+      request.socket?.remoteAddress ||
+      'Unknown'
+    );
   }
 }

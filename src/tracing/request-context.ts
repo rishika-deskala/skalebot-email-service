@@ -17,7 +17,10 @@ export const RequestContext = {
   get(): RequestContextData | undefined {
     return als.getStore();
   },
-  set<K extends keyof RequestContextData>(key: K, value: RequestContextData[K]) {
+  set<K extends keyof RequestContextData>(
+    key: K,
+    value: RequestContextData[K],
+  ) {
     const store = als.getStore();
     if (store) (store as any)[key] = value;
   },

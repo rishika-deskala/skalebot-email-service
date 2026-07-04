@@ -1,13 +1,11 @@
-import axios, { AxiosInstance } from "axios";
-import { BadRequestException, Injectable } from "@nestjs/common";
-import { ConfigService } from "@nestjs/config";
-import { AppLogger } from "src/logger/logger.module";
+import axios, { AxiosInstance } from 'axios';
+import { BadRequestException, Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { AppLogger } from 'src/logger/logger.module';
 import * as FormData from 'form-data';
-
 
 @Injectable()
 export class MetaHelperService {
-
   private readonly headers: any;
   private readonly baseUrl: string;
   private readonly axiosInstance: AxiosInstance;
@@ -16,10 +14,10 @@ export class MetaHelperService {
     private readonly configService: ConfigService,
     private readonly logger: AppLogger,
   ) {
-    this.baseUrl = this.configService.get('WCA_BASE_URL') || "";
+    this.baseUrl = this.configService.get('WCA_BASE_URL') || '';
     this.headers = {
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${this.configService.get('WCA_TOKEN')}`,
+      Authorization: `Bearer ${this.configService.get('WCA_TOKEN')}`,
     };
     this.axiosInstance = axios.create();
   }
@@ -33,7 +31,9 @@ export class MetaHelperService {
       session: { sdp_type: 'answer', sdp: callData.sdpAnswer },
     };
 
-    var apiRes = await this.axiosInstance.post(url, payload, { headers: this.headers });
+    var apiRes = await this.axiosInstance.post(url, payload, {
+      headers: this.headers,
+    });
     return apiRes.data;
   }
 
@@ -45,7 +45,9 @@ export class MetaHelperService {
       action: callData.action,
     };
 
-    var apiRes = await this.axiosInstance.post(url, payload, { headers: this.headers });
+    var apiRes = await this.axiosInstance.post(url, payload, {
+      headers: this.headers,
+    });
     return apiRes.data;
   }
 
@@ -54,13 +56,15 @@ export class MetaHelperService {
     const payload = {
       messaging_product: 'whatsapp',
       to: callData.phone,
-      action: "connect",
+      action: 'connect',
       session: {
-        "sdp_type": "offer",
-        "sdp": callData.sdpOffer
-      }
+        sdp_type: 'offer',
+        sdp: callData.sdpOffer,
+      },
     };
-    var apiRes = await this.axiosInstance.post(url, payload, { headers: this.headers });
+    var apiRes = await this.axiosInstance.post(url, payload, {
+      headers: this.headers,
+    });
     return apiRes.data;
   }
 
@@ -88,9 +92,15 @@ export class MetaHelperService {
     var apiData = apiRes.data;
 
     var businessId = apiData.on_behalf_of_business_info?.id;
-    var phoneNumberId = apiData.phone_numbers?.data?.length > 0 ? apiData.phone_numbers.data[0].id : "";
+    var phoneNumberId =
+      apiData.phone_numbers?.data?.length > 0
+        ? apiData.phone_numbers.data[0].id
+        : '';
     var name = apiData.name;
-    var phoneNumber = apiData.phone_numbers?.data?.length > 0 ? apiData.phone_numbers.data[0].display_phone_number : "";
+    var phoneNumber =
+      apiData.phone_numbers?.data?.length > 0
+        ? apiData.phone_numbers.data[0].display_phone_number
+        : '';
 
     return { businessId, phoneNumberId, name, phoneNumber };
   }
@@ -105,8 +115,8 @@ export class MetaHelperService {
   public async registerPhoneNumber(phoneNumberId: string, pin: number) {
     var url = `${this.baseUrl}/${phoneNumberId}/register`;
     const payload = {
-      messaging_product: "whatsapp",
-      pin: pin
+      messaging_product: 'whatsapp',
+      pin: pin,
     };
 
     var apiRes = await this.triggerMetaApi('post', url, payload);
@@ -201,7 +211,6 @@ export class MetaHelperService {
       headers,
     });
 
-
     return apiRes.data;
   }
 
@@ -218,16 +227,13 @@ export class MetaHelperService {
   ) {
     const appId = this.configService.get('WCA_APP_ID');
 
-
     const url = `${this.baseUrl}/${appId}/uploads`;
-
 
     const payload = {
       file_name: fileName,
       file_length: fileLength,
       file_type: fileType,
     };
-
 
     const apiRes = await this.triggerMetaApi('post', url, payload);
     return apiRes.data; // return upload session id
@@ -241,7 +247,7 @@ export class MetaHelperService {
     const url = `${this.baseUrl}/${phoneNumberId}/block_users`;
     const payload = {
       messaging_product: 'whatsapp',
-      block_users: users.map(user => ({ user })),
+      block_users: users.map((user) => ({ user })),
     };
     const method = isBlock ? 'post' : 'delete';
     const apiRes = await this.triggerMetaApi(method, url, payload);
@@ -268,20 +274,13 @@ export class MetaHelperService {
   ) {
     const url = `${this.baseUrl}/${uploadSessionId}`;
 
-
     const headers = {
       Authorization: `OAuth ${this.configService.get('WCA_TOKEN')}`,
       file_offset: '0',
       'Content-Type': file.mimetype,
     };
 
-
-    const apiRes = await this.axiosInstance.post(
-      url,
-      file.buffer,
-      { headers },
-    );
-
+    const apiRes = await this.axiosInstance.post(url, file.buffer, { headers });
 
     return apiRes.data; // returns handle
   }
@@ -338,17 +337,24 @@ export class MetaHelperService {
     return apiRes.data;
   }
 
-  public async updatePaymentConfiguration(wabaId: string, configurationName: string, payload: any) {
+  public async updatePaymentConfiguration(
+    wabaId: string,
+    configurationName: string,
+    payload: any,
+  ) {
     const url = `${this.baseUrl}/${wabaId}/payment_configurations/${configurationName}`;
     const apiRes = await this.triggerMetaApi('post', url, payload);
     return apiRes.data;
   }
 
-  public async deletePaymentConfiguration(wabaId: string, configurationName: string) {
+  public async deletePaymentConfiguration(
+    wabaId: string,
+    configurationName: string,
+  ) {
     const url = `${this.baseUrl}/${wabaId}/payment_configurations`;
     const payload = {
-      configuration_name: configurationName
-    }
+      configuration_name: configurationName,
+    };
     const apiRes = await this.triggerMetaApi('delete', url, payload);
     return apiRes.data;
   }
@@ -365,26 +371,48 @@ export class MetaHelperService {
     return apiRes.data;
   }
 
-  private async triggerMetaApi(type: string, url: string, payload?: any, params?: any) {
+  private async triggerMetaApi(
+    type: string,
+    url: string,
+    payload?: any,
+    params?: any,
+  ) {
     try {
       switch (type) {
         case 'get':
-          return await this.axiosInstance.get(url, { headers: this.headers, params: params });
+          return await this.axiosInstance.get(url, {
+            headers: this.headers,
+            params: params,
+          });
         case 'post':
-          return await this.axiosInstance.post(url, payload, { headers: this.headers });
+          return await this.axiosInstance.post(url, payload, {
+            headers: this.headers,
+          });
         case 'delete':
-          return await this.axiosInstance.delete(url, { headers: this.headers, data: payload });
+          return await this.axiosInstance.delete(url, {
+            headers: this.headers,
+            data: payload,
+          });
         case 'put':
-          return await this.axiosInstance.put(url, payload, { headers: this.headers });
+          return await this.axiosInstance.put(url, payload, {
+            headers: this.headers,
+          });
         default:
           throw new Error('Invalid request type');
       }
-    }
-    catch (error) {
+    } catch (error) {
       this.logger.error(`Meta API Error: ${error}`, 'MetaHelperService');
       if (axios.isAxiosError(error) && error.response) {
-        if (error.status === 400 || error.status === 401 || error.status === 403 || error.status === 404) {
-          throw new BadRequestException(error.response.data.error, error.response.data.error.message);
+        if (
+          error.status === 400 ||
+          error.status === 401 ||
+          error.status === 403 ||
+          error.status === 404
+        ) {
+          throw new BadRequestException(
+            error.response.data.error,
+            error.response.data.error.message,
+          );
         }
       }
       throw error;

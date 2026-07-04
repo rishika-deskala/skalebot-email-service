@@ -19,18 +19,18 @@ async function bootstrap() {
 
   // Register global exception filter with logger injection
   app.useGlobalFilters(new AllExceptionsFilter(logger));
-  
+
   // Register global interceptors
   app.useGlobalInterceptors(
     new RequestLoggingInterceptor(logger),
-    new NewRelicAttributesInterceptor()
+    new NewRelicAttributesInterceptor(),
   );
   // Swagger setup
   const globalPrefix = process.env.APP_NAME || 'wca-webhook';
   const swaggerPath = 'skalebot-api-docs';
-  let server = "/";
+  let server = '/';
   if (process.env.DEBUG != 'true') {
-    server = "/" + globalPrefix;
+    server = '/' + globalPrefix;
   }
 
   const config = new DocumentBuilder()

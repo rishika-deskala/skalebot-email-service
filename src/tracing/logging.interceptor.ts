@@ -1,4 +1,9 @@
-import { CallHandler, ExecutionContext, Injectable, NestInterceptor } from '@nestjs/common';
+import {
+  CallHandler,
+  ExecutionContext,
+  Injectable,
+  NestInterceptor,
+} from '@nestjs/common';
 import { Observable, tap } from 'rxjs';
 import { Request, Response } from 'express';
 import { RequestContext } from './request-context';
@@ -64,15 +69,25 @@ export class LoggingInterceptor implements NestInterceptor {
           body: req.body,
           ip: req.ip,
           k8s: {
-            podName: pod.name, podUid: pod.uid, namespace: pod.ns, nodeName: pod.node, containerName: pod.container,
+            podName: pod.name,
+            podUid: pod.uid,
+            namespace: pod.ns,
+            nodeName: pod.node,
+            containerName: pod.container,
           },
         });
 
         // eslint-disable-next-line no-console
-        console.info(JSON.stringify({
-          msg: 'request_completed',
-          chainId, method: req.method, path: req.originalUrl || req.url, statusCode: res.statusCode, durationMs,
-        }));
+        console.info(
+          JSON.stringify({
+            msg: 'request_completed',
+            chainId,
+            method: req.method,
+            path: req.originalUrl || req.url,
+            statusCode: res.statusCode,
+            durationMs,
+          }),
+        );
       }),
     );
   }

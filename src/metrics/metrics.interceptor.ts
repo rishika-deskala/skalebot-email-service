@@ -14,7 +14,9 @@ export class MetricsInterceptor implements NestInterceptor {
 
   intercept(ctx: ExecutionContext, next: CallHandler): Observable<any> {
     const httpCtx = ctx.switchToHttp();
-    const req = httpCtx.getRequest<Request & { method: string; route?: any; url: string }>();
+    const req = httpCtx.getRequest<
+      Request & { method: string; route?: any; url: string }
+    >();
     const res = httpCtx.getResponse<any>();
 
     const method = (req?.method || 'GET').toUpperCase();
@@ -22,7 +24,7 @@ export class MetricsInterceptor implements NestInterceptor {
     const route =
       (req as any)?.route?.path ||
       // For Fastify/Nest 10+, you can try:
-      (res?.request?.routeOptions?.url) ||
+      res?.request?.routeOptions?.url ||
       // last resort (less ideal):
       (req as any)?.originalUrl ||
       (req as any)?.url ||
@@ -37,7 +39,10 @@ export class MetricsInterceptor implements NestInterceptor {
         const durSeconds = Number(end - start) / 1e9;
 
         this.metrics.httpRequestsTotal.inc({ method, route, status });
-        this.metrics.httpRequestDuration.observe({ method, route, status }, durSeconds);
+        this.metrics.httpRequestDuration.observe(
+          { method, route, status },
+          durSeconds,
+        );
       }),
     );
   }

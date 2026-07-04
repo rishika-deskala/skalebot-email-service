@@ -10,10 +10,10 @@ export const MicroserviceProviders = [
     useFactory: (configService: ConfigService) =>
       ClientProxyFactory.create({
         transport: Transport.TCP,
-        options: { 
-            host: configService.get<string>('AUTH_SERVICE_HOST'),
-            port: configService.get<number>('AUTH_SERVICE_PORT')
-        }, 
+        options: {
+          host: configService.get<string>('AUTH_SERVICE_HOST'),
+          port: configService.get<number>('AUTH_SERVICE_PORT'),
+        },
       }),
   },
   {
@@ -22,9 +22,9 @@ export const MicroserviceProviders = [
     useFactory: (configService: ConfigService) =>
       ClientProxyFactory.create({
         transport: Transport.TCP,
-        options: { 
-            host: configService.get<string>('SOCKET_SERVICE_HOST'),
-            port: configService.get<number>('SOCKET_SERVICE_PORT')
+        options: {
+          host: configService.get<string>('SOCKET_SERVICE_HOST'),
+          port: configService.get<number>('SOCKET_SERVICE_PORT'),
         },
       }),
   },

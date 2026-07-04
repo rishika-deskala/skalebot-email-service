@@ -2,16 +2,16 @@ import { Injectable } from '@nestjs/common';
 
 @Injectable()
 export class AppService {
-    getHealth(): { status: string; timestamp: string } {
-        return {
-            status: 'ok',
-            timestamp: new Date().toISOString(),
-        };
-    }
+  getHealth(): { status: string; timestamp: string } {
+    return {
+      status: 'ok',
+      timestamp: new Date().toISOString(),
+    };
+  }
 
-    getWelcome(): { message: string } {
-        return {
-            message: 'Welcome to RCS Service',
-        };
-    }
+  getWelcome(): { message: string } {
+    return {
+      message: 'Welcome to RCS Service',
+    };
+  }
 }

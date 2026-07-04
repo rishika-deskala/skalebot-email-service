@@ -6,7 +6,7 @@ import { HealthModule } from './modules/health.module';
 
 @Module({
   imports: [LoggerModule, HealthModule],
-    controllers: [AppController],
-    providers: [AppService],
+  controllers: [AppController],
+  providers: [AppService],
 })
-export class AppModule { }
+export class AppModule {}

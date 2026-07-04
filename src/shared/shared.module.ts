@@ -7,9 +7,7 @@ import { MetaCatalogHelperService } from './metaHelperService/meta.catalog.helpe
 
 @Global()
 @Module({
-  imports: [
-    MicroservicesModule,
-  ],
+  imports: [MicroservicesModule],
   providers: [
     UserInfoProvider,
     MetaHelperService,
@@ -23,4 +21,4 @@ import { MetaCatalogHelperService } from './metaHelperService/meta.catalog.helpe
     MetaCatalogHelperService,
   ],
 })
-export class SharedModule { }
+export class SharedModule {}

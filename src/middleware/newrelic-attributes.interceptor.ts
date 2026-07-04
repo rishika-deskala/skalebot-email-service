@@ -1,5 +1,10 @@
 // src/observability/newrelic-attributes.interceptor.ts
-import { CallHandler, ExecutionContext, Injectable, NestInterceptor } from '@nestjs/common';
+import {
+  CallHandler,
+  ExecutionContext,
+  Injectable,
+  NestInterceptor,
+} from '@nestjs/common';
 import { Observable } from 'rxjs';
 import * as newrelic from 'newrelic';
 import { requestContext } from './request-context';

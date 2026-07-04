@@ -21,11 +21,13 @@ export class AuthGuard implements CanActivate {
     const authHeader = request.headers;
     const authToken = authHeader['authorization'];
     if (!authToken) return false;
-      const userInfo = await firstValueFrom(this.authClient.send('validate_token', authHeader));
+    const userInfo = await firstValueFrom(
+      this.authClient.send('validate_token', authHeader),
+    );
 
-      if (!userInfo) return false;
+    if (!userInfo) return false;
 
-      this.userInfoProvider.setUser(userInfo);
-      return true;
+    this.userInfoProvider.setUser(userInfo);
+    return true;
   }
 }

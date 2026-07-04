@@ -19,9 +19,7 @@ type RedactQuery = {
 
 @Controller('traces')
 export class TracesController {
-  constructor(
-    @Inject(TRACE_STORE_TOKEN) private readonly store: TraceStore,
-  ) {}
+  constructor(@Inject(TRACE_STORE_TOKEN) private readonly store: TraceStore) {}
 
   @Get(':chainId')
   async getByChainId(
@@ -49,7 +47,13 @@ const SENSITIVE_HEADER_NAMES = new Set([
   'x-api-key',
   'x-auth-token',
 ]);
-const SENSITIVE_HEADER_SUBSTRINGS = ['token', 'secret', 'apikey', 'api-key', 'key'];
+const SENSITIVE_HEADER_SUBSTRINGS = [
+  'token',
+  'secret',
+  'apikey',
+  'api-key',
+  'key',
+];
 
 const SENSITIVE_BODY_KEYS = new Set([
   'password',
@@ -94,7 +98,10 @@ function redactObject(obj: any): any {
 
   const out: Record<string, any> = {};
   for (const [k, v] of Object.entries(obj)) {
-    if (SENSITIVE_BODY_KEYS.has(k) || SENSITIVE_BODY_KEYS.has(k.toLowerCase())) {
+    if (
+      SENSITIVE_BODY_KEYS.has(k) ||
+      SENSITIVE_BODY_KEYS.has(k.toLowerCase())
+    ) {
       out[k] = mask(v);
     } else if (v && typeof v === 'object') {
       out[k] = redactObject(v);
