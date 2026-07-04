@@ -9,7 +9,7 @@ export class TemplateDao {
   constructor(
     @InjectModel(EmailTemplate)
     private readonly emailTemplateModel: typeof EmailTemplate,
-  ) {}
+  ) { }
 
   async create(createTemplateDto: CreateTemplateDto): Promise<EmailTemplate> {
     return this.emailTemplateModel.create({
@@ -46,24 +46,24 @@ export class TemplateDao {
     const template = await this.emailTemplateModel.findOne({
       where: { id, isActive: true },
     });
-    
+
     if (!template) {
       throw new NotFoundException(`Template with ID ${id} not found`);
     }
-    
+
     return template;
   }
 
   async update(id: number, updateTemplateDto: any): Promise<EmailTemplate> {
     const template = await this.findById(id);
-    
+
     return template.update(updateTemplateDto);
   }
 
   async delete(id: number): Promise<void> {
     const template = await this.findById(id);
-    
-    // Soft delete logic as requested
+
+    // Soft delete logic 
     await template.update({ isActive: false });
   }
 }

@@ -8,7 +8,7 @@ import { Op } from 'sequelize';
 
 @Injectable()
 export class TemplateService {
-  constructor(private readonly templateDao: TemplateDao) {}
+  constructor(private readonly templateDao: TemplateDao) { }
 
   /**
    * Validates that all placeholders in the format {{variableName}} within subject and body
@@ -17,14 +17,14 @@ export class TemplateService {
   private validateTemplateVariables(subject: string, body: string, variables?: Record<string, any>) {
     const regex = /\{\{\s*([a-zA-Z0-9_]+)\s*\}\}/g;
     const referencedVars = new Set<string>();
-    
+
     let match;
     // Reset regex lastIndex just in case
     regex.lastIndex = 0;
     while ((match = regex.exec(subject)) !== null) {
       referencedVars.add(match[1]);
     }
-    
+
     regex.lastIndex = 0;
     while ((match = regex.exec(body)) !== null) {
       referencedVars.add(match[1]);
@@ -42,7 +42,7 @@ export class TemplateService {
   async create(createTemplateDto: CreateTemplateDto, user: any): Promise<EmailTemplate> {
     const { name, companyId, subject, body, variables } = createTemplateDto;
 
-    // 1. Business Logic: Unique name per company
+    // 1. Unique name per company
     const existing = await this.templateDao.findAll({
       name,
       companyId,
@@ -51,12 +51,12 @@ export class TemplateService {
       throw new ConflictException(`Template with name "${name}" already exists for company ID ${companyId}`);
     }
 
-    // 2. Business Logic: Variable formatting & definition validation
+    // 2. Variable formatting & definition validation
     this.validateTemplateVariables(subject, body, variables);
 
     // 3. Track createdBy and updatedBy
     const userId = user?.id || user?.userId || 0;
-    
+
     return this.templateDao.create({
       ...createTemplateDto,
       createdBy: userId,
@@ -70,7 +70,7 @@ export class TemplateService {
   ): Promise<PaginatedResponse<EmailTemplate>> {
     const limit = query.limit ? Number(query.limit) : 10;
     const offset = query.offset ? Number(query.offset) : 0;
-    
+
     const filter: any = { companyId };
 
     if (query.search) {
@@ -89,8 +89,8 @@ export class TemplateService {
 
   async findById(id: number, companyId: number): Promise<EmailTemplate> {
     const template = await this.templateDao.findById(id);
-    
-    // Security check: Ensure template belongs to the requested company
+
+    // Ensure template belongs to the requested company
     if (template.companyId !== companyId) {
       throw new NotFoundException(`Template with ID ${id} not found`);
     }
@@ -122,7 +122,7 @@ export class TemplateService {
     const newSubject = updateTemplateDto.subject !== undefined ? updateTemplateDto.subject : template.subject;
     const newBody = updateTemplateDto.body !== undefined ? updateTemplateDto.body : template.body;
     const newVariables = updateTemplateDto.variables !== undefined ? updateTemplateDto.variables : template.variables;
-    
+
     this.validateTemplateVariables(newSubject, newBody, newVariables);
 
     const userId = user?.id || user?.userId || 0;
