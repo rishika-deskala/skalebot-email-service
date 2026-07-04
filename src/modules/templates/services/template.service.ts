@@ -1,0 +1,145 @@
+import { Injectable, ConflictException, BadRequestException, NotFoundException } from '@nestjs/common';
+import { TemplateDao } from '../dao/template.dao';
+import { CreateTemplateDto } from '../dto/create-template.dto';
+import { UpdateTemplateDto } from '../dto/update-template.dto';
+import { EmailTemplate } from '../../../models/template.model';
+import { PaginatedResponse } from '../../../interfaces/paginated-response.interface';
+import { Op } from 'sequelize';
+
+@Injectable()
+export class TemplateService {
+  constructor(private readonly templateDao: TemplateDao) {}
+
+  /**
+   * Validates that all placeholders in the format {{variableName}} within subject and body
+   * are defined in the variables object.
+   */
+  private validateTemplateVariables(subject: string, body: string, variables?: Record<string, any>) {
+    const regex = /\{\{\s*([a-zA-Z0-9_]+)\s*\}\}/g;
+    const referencedVars = new Set<string>();
+    
+    let match;
+    // Reset regex lastIndex just in case
+    regex.lastIndex = 0;
+    while ((match = regex.exec(subject)) !== null) {
+      referencedVars.add(match[1]);
+    }
+    
+    regex.lastIndex = 0;
+    while ((match = regex.exec(body)) !== null) {
+      referencedVars.add(match[1]);
+    }
+
+    if (referencedVars.size > 0) {
+      const providedKeys = variables ? Object.keys(variables) : [];
+      const missing = Array.from(referencedVars).filter(v => !providedKeys.includes(v));
+      if (missing.length > 0) {
+        throw new BadRequestException(`Missing definition for referenced template variables: ${missing.join(', ')}`);
+      }
+    }
+  }
+
+  async create(createTemplateDto: CreateTemplateDto, user: any): Promise<EmailTemplate> {
+    const { name, companyId, subject, body, variables } = createTemplateDto;
+
+    // 1. Business Logic: Unique name per company
+    const existing = await this.templateDao.findAll({
+      name,
+      companyId,
+    });
+    if (existing && existing.length > 0) {
+      throw new ConflictException(`Template with name "${name}" already exists for company ID ${companyId}`);
+    }
+
+    // 2. Business Logic: Variable formatting & definition validation
+    this.validateTemplateVariables(subject, body, variables);
+
+    // 3. Track createdBy and updatedBy
+    const userId = user?.id || user?.userId || 0;
+    
+    return this.templateDao.create({
+      ...createTemplateDto,
+      createdBy: userId,
+      updatedBy: userId,
+    } as any);
+  }
+
+  async findAll(
+    companyId: number,
+    query: { limit?: number; offset?: number; search?: string },
+  ): Promise<PaginatedResponse<EmailTemplate>> {
+    const limit = query.limit ? Number(query.limit) : 10;
+    const offset = query.offset ? Number(query.offset) : 0;
+    
+    const filter: any = { companyId };
+
+    if (query.search) {
+      filter.name = {
+        [Op.like]: `%${query.search}%`,
+      };
+    }
+
+    const { count, rows } = await this.templateDao.findAndCountAll(filter, limit, offset);
+
+    return {
+      count,
+      rows,
+    };
+  }
+
+  async findById(id: number, companyId: number): Promise<EmailTemplate> {
+    const template = await this.templateDao.findById(id);
+    
+    // Security check: Ensure template belongs to the requested company
+    if (template.companyId !== companyId) {
+      throw new NotFoundException(`Template with ID ${id} not found`);
+    }
+
+    return template;
+  }
+
+  async update(id: number, updateTemplateDto: UpdateTemplateDto, user: any): Promise<EmailTemplate> {
+    const companyId = updateTemplateDto.companyId || user?.companyId;
+    const template = await this.templateDao.findById(id);
+
+    // Verify company scope
+    if (companyId && template.companyId !== companyId) {
+      throw new NotFoundException(`Template with ID ${id} not found`);
+    }
+
+    // Check duplicate name per company on rename
+    if (updateTemplateDto.name && updateTemplateDto.name !== template.name) {
+      const existing = await this.templateDao.findAll({
+        name: updateTemplateDto.name,
+        companyId: template.companyId,
+      });
+      if (existing && existing.length > 0) {
+        throw new ConflictException(`Template with name "${updateTemplateDto.name}" already exists for this company`);
+      }
+    }
+
+    // Validate variables if subject, body, or variables are being updated
+    const newSubject = updateTemplateDto.subject !== undefined ? updateTemplateDto.subject : template.subject;
+    const newBody = updateTemplateDto.body !== undefined ? updateTemplateDto.body : template.body;
+    const newVariables = updateTemplateDto.variables !== undefined ? updateTemplateDto.variables : template.variables;
+    
+    this.validateTemplateVariables(newSubject, newBody, newVariables);
+
+    const userId = user?.id || user?.userId || 0;
+
+    return this.templateDao.update(id, {
+      ...updateTemplateDto,
+      updatedBy: userId,
+    });
+  }
+
+  async delete(id: number, companyId: number): Promise<void> {
+    // Verify ownership before deleting
+    const template = await this.templateDao.findById(id);
+    if (template.companyId !== companyId) {
+      throw new NotFoundException(`Template with ID ${id} not found`);
+    }
+
+    await this.templateDao.delete(id);
+  }
+}

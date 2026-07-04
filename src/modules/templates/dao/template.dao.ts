@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { EmailTemplate } from '../../../models/template.model';
 import { CreateTemplateDto } from '../dto/create-template.dto';
-import { UpdateTemplateDto } from '../dto/update-template.dto';
+
 
 @Injectable()
 export class TemplateDao {
@@ -26,6 +26,22 @@ export class TemplateDao {
     });
   }
 
+  async findAndCountAll(
+    filter: any = {},
+    limit?: number,
+    offset?: number,
+  ): Promise<{ count: number; rows: EmailTemplate[] }> {
+    return this.emailTemplateModel.findAndCountAll({
+      where: {
+        isActive: true,
+        ...filter,
+      },
+      limit,
+      offset,
+      order: [['createdAt', 'DESC']],
+    });
+  }
+
   async findById(id: number): Promise<EmailTemplate> {
     const template = await this.emailTemplateModel.findOne({
       where: { id, isActive: true },
@@ -38,7 +54,7 @@ export class TemplateDao {
     return template;
   }
 
-  async update(id: number, updateTemplateDto: UpdateTemplateDto): Promise<EmailTemplate> {
+  async update(id: number, updateTemplateDto: any): Promise<EmailTemplate> {
     const template = await this.findById(id);
     
     return template.update(updateTemplateDto);
