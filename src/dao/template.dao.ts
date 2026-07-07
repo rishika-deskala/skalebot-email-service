@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
-import { EmailTemplate } from '../../../models/template.model';
+import { EmailTemplate } from '../models/template.model';
 import { CreateTemplateDto } from '../dto/create-template.dto';
 
 

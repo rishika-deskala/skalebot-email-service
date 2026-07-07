@@ -11,8 +11,8 @@ import {
   ParseIntPipe,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
-import { AuthGuard } from '../../../shared/guards/auth.guard';
-import { UserInfoProvider } from '../../../shared/providers/user-info.provider';
+import { AuthGuard } from '../shared/guards/auth.guard';
+import { UserInfoProvider } from '../shared/providers/user-info.provider';
 import { TemplateService } from '../services/template.service';
 import { CreateTemplateDto } from '../dto/create-template.dto';
 import { UpdateTemplateDto } from '../dto/update-template.dto';
@@ -25,7 +25,7 @@ export class TemplateController {
   constructor(
     private readonly templateService: TemplateService,
     private readonly userInfoProvider: UserInfoProvider,
-  ) {}
+  ) { }
 
   @Post()
   @ApiOperation({ summary: 'Create a new email template' })
