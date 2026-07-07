@@ -17,8 +17,8 @@ import { getDatabaseConfig } from './config/sqldb.config';
       useFactory: getDatabaseConfig,
       inject: [ConfigService],
     }),
-    LoggerModule, 
-    HealthModule, 
+    LoggerModule,
+    HealthModule,
     TemplatesModule,
     SharedModule
   ],
