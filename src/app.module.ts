@@ -5,7 +5,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { LoggerModule } from './logger/logger.module';
 import { HealthModule } from './modules/health.module';
-import { TemplatesModule } from './modules/templates/templates.module';
+import { TemplatesModule } from './modules/templates.module';
 import { SharedModule } from './shared/shared.module';
 import { getDatabaseConfig } from './config/sqldb.config';
 
