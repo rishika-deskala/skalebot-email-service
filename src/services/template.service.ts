@@ -2,8 +2,8 @@ import { Injectable, ConflictException, BadRequestException, NotFoundException }
 import { TemplateDao } from '../dao/template.dao';
 import { CreateTemplateDto } from '../dto/create-template.dto';
 import { UpdateTemplateDto } from '../dto/update-template.dto';
-import { EmailTemplate } from '../../../models/template.model';
-import { PaginatedResponse } from '../../../interfaces/paginated-response.interface';
+import { EmailTemplate } from '../models/template.model';
+import { PaginatedResponse } from '../interfaces/paginated-response.interface';
 import { Op } from 'sequelize';
 
 @Injectable()
