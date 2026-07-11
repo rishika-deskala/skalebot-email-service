@@ -2,6 +2,7 @@ import { Injectable, ConflictException, BadRequestException, NotFoundException }
 import { TemplateDao } from '../dao/template.dao';
 import { CreateTemplateDto } from '../dto/create-template.dto';
 import { UpdateTemplateDto } from '../dto/update-template.dto';
+import { SendTemplateDto } from '../dto/send-template.dto';
 import { EmailTemplate } from '../models/template.model';
 import { PaginatedResponse } from '../interfaces/paginated-response.interface';
 import { Op } from 'sequelize';
@@ -142,4 +143,43 @@ export class TemplateService {
 
     await this.templateDao.delete(id);
   }
+
+
+  private renderTemplate(text: string, variables?: Record<string, string>): string {
+    if (!variables || Object.keys(variables).length === 0) {
+      return text;
+    }
+
+    return text.replace(/\{\{\s*([a-zA-Z0-9_]+)\s*\}\}/g, (match, varName) => {
+      return variables[varName] !== undefined ? variables[varName] : match;
+    });
+  }
+
+  //Sends a template to multiple recipients by rendering per-recipient variables. 
+  async send(
+    templateId: number,
+    companyId: number,
+    sendTemplateDto: SendTemplateDto,
+  ): Promise<{ total: number; results: { email: string; status: string }[] }> {
+    const template = await this.findById(templateId, companyId);
+
+    const results = sendTemplateDto.recipients.map((recipient) => {
+      const renderedSubject = this.renderTemplate(template.subject, recipient.variables);
+      const renderedBody = this.renderTemplate(template.body, recipient.variables);
+
+      return {
+        email: recipient.email,
+        subject: renderedSubject,
+        body: renderedBody,
+        emailConfigId: sendTemplateDto.emailConfigId,
+        status: 'queued',
+      };
+    });
+
+    return {
+      total: results.length,
+      results: results.map(({ email, status }) => ({ email, status })),
+    };
+  }
 }
+

@@ -16,6 +16,7 @@ import { UserInfoProvider } from '../shared/providers/user-info.provider';
 import { TemplateService } from '../services/template.service';
 import { CreateTemplateDto } from '../dto/create-template.dto';
 import { UpdateTemplateDto } from '../dto/update-template.dto';
+import { SendTemplateDto } from '../dto/send-template.dto';
 
 @ApiTags('Templates')
 @ApiBearerAuth('access-token')
@@ -82,5 +83,18 @@ export class TemplateController {
     const companyId = user?.companyId || 0;
     await this.templateService.delete(id, companyId);
     return { success: true, message: `Template with ID ${id} soft-deleted.` };
+  }
+
+  @Post(':id/send')
+  @ApiOperation({ summary: 'Send a template email to one or more recipients' })
+  @ApiResponse({ status: 200, description: 'Per-recipient dispatch result.' })
+  @ApiResponse({ status: 404, description: 'Template not found.' })
+  async send(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() sendTemplateDto: SendTemplateDto,
+  ) {
+    const user = this.userInfoProvider.getUser();
+    const companyId = user?.companyId || 0;
+    return this.templateService.send(id, companyId, sendTemplateDto);
   }
 }
