@@ -8,7 +8,8 @@ import { HealthModule } from './modules/health.module';
 import { TemplatesModule } from './modules/templates.module';
 import { SharedModule } from './shared/shared.module';
 import { getDatabaseConfig } from './config/sqldb.config';
-
+import { EmailConfigsModule } from './modules/emailConfig.module';
+import {sendMailModule} from './modules/sendMail.module';
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
@@ -17,10 +18,12 @@ import { getDatabaseConfig } from './config/sqldb.config';
       useFactory: getDatabaseConfig,
       inject: [ConfigService],
     }),
-    LoggerModule,
-    HealthModule,
+    LoggerModule, 
+    HealthModule, 
     TemplatesModule,
-    SharedModule
+    SharedModule,
+    EmailConfigsModule,
+    sendMailModule
   ],
   controllers: [AppController],
   providers: [AppService],
