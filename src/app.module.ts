@@ -7,6 +7,7 @@ import { LoggerModule } from './logger/logger.module';
 import { HealthModule } from './modules/health.module';
 import { TemplatesModule } from './modules/templates.module';
 import { SharedModule } from './shared/shared.module';
+import { CampaignModule } from './modules/campaign.module';
 import { getDatabaseConfig } from './config/sqldb.config';
 
 @Module({
@@ -20,9 +21,10 @@ import { getDatabaseConfig } from './config/sqldb.config';
     LoggerModule,
     HealthModule,
     TemplatesModule,
-    SharedModule
+    SharedModule,
+    CampaignModule,
   ],
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule { }
+export class AppModule {}
