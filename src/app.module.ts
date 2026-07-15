@@ -7,9 +7,11 @@ import { LoggerModule } from './logger/logger.module';
 import { HealthModule } from './modules/health.module';
 import { TemplatesModule } from './modules/templates.module';
 import { SharedModule } from './shared/shared.module';
+import { CampaignModule } from './modules/campaign.module';
 import { getDatabaseConfig } from './config/sqldb.config';
 import { EmailConfigsModule } from './modules/emailConfig.module';
-import {sendMailModule} from './modules/sendMail.module';
+import { sendMailModule } from './modules/sendMail.module';
+
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
@@ -18,14 +20,15 @@ import {sendMailModule} from './modules/sendMail.module';
       useFactory: getDatabaseConfig,
       inject: [ConfigService],
     }),
-    LoggerModule, 
-    HealthModule, 
+    LoggerModule,
+    HealthModule,
     TemplatesModule,
     SharedModule,
+    CampaignModule,
     EmailConfigsModule,
-    sendMailModule
+    sendMailModule,
   ],
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule { }
+export class AppModule {}
