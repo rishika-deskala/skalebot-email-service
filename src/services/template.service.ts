@@ -89,13 +89,7 @@ export class TemplateService {
   }
 
   async findById(id: number, companyId: number): Promise<EmailTemplate> {
-    const template = await this.templateDao.findById(id);
-
-    // Ensure template belongs to the requested company
-    if (template.companyId !== companyId) {
-      throw new NotFoundException(`Template with ID ${id} not found`);
-    }
-
+    const template = await this.templateDao.findById(id, companyId);
     return template;
   }
 

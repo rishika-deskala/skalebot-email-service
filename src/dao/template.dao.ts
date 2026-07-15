@@ -42,10 +42,13 @@ export class TemplateDao {
     });
   }
 
-  async findById(id: number): Promise<EmailTemplate> {
-    const template = await this.emailTemplateModel.findOne({
-      where: { id, isActive: true },
-    });
+  async findById(id: number, companyId?: number): Promise<EmailTemplate> {
+    const where: any = { id, isActive: true };
+    if (companyId !== undefined && companyId !== 0) {
+      where.companyId = companyId;
+    }
+
+    const template = await this.emailTemplateModel.findOne({ where });
 
     if (!template) {
       throw new NotFoundException(`Template with ID ${id} not found`);
