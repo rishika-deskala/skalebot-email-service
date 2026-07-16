@@ -1,14 +1,39 @@
 import { Injectable } from '@nestjs/common';
 import { CampaignDao } from '../dao/campaign.dao';
 import { Campaign } from '../models/campaign.model';
+import { sendMailService } from './sendMail.service';
+import { SendMailDto } from '../dto/sendMail.dto';
 
 @Injectable()
 export class CampaignService {
-  constructor(private readonly campaignDao: CampaignDao) {}
+  constructor(
+    private readonly campaignDao: CampaignDao,
+    private readonly sendMailService: sendMailService,
+  ) {}
 
-  async createCampaign(data: Partial<Campaign>): Promise<Campaign> {
-    return this.campaignDao.createCampaign(data);
-  }
+ async createCampaign(data: Partial<Campaign>): Promise<Campaign> {
+ 
+  const campaign = await this.campaignDao.createCampaign(data);
+
+
+  const mailDto: SendMailDto = {
+    recipients: [
+      'test1@gmail.com',
+      'test2@gmail.com',
+    ],
+    subject: campaign.subject,
+    html: campaign.body,
+    text: campaign.body,
+  };
+
+ 
+  await this.sendMailService.sendMail(
+    campaign.emailConfigId,
+    mailDto,
+  );
+
+  return campaign;
+}
 
   async getAllCampaigns(): Promise<Campaign[]> {
     return this.campaignDao.getAllCampaigns();
