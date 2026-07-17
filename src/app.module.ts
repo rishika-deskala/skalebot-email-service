@@ -11,6 +11,7 @@ import { CampaignModule } from './modules/campaign.module';
 import { getDatabaseConfig } from './config/sqldb.config';
 import { EmailConfigsModule } from './modules/emailConfig.module';
 import { sendMailModule } from './modules/sendMail.module';
+import { CampaignStatusModule } from './modules/campaignStatus.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { sendMailModule } from './modules/sendMail.module';
     CampaignModule,
     EmailConfigsModule,
     sendMailModule,
+    CampaignStatusModule,
   ],
   controllers: [AppController],
   providers: [AppService],

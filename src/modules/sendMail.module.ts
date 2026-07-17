@@ -4,10 +4,11 @@ import { EmailConfig } from '../models/emailConfig.model';
 import { sendMailController } from '../controllers/sendMail.controller';
 import { sendMailService } from '../services/sendMail.service';
 import { EmailConfigDao } from '../dao/emailConfig.dao';
+import { TrackingController } from '../controllers/tracking.controller';
 
 @Module({
   imports: [SequelizeModule.forFeature([EmailConfig])],
-  controllers: [sendMailController],
+  controllers: [sendMailController, TrackingController],
   providers: [sendMailService, EmailConfigDao],
   exports: [sendMailService],
 })

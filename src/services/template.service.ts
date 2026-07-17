@@ -1,4 +1,4 @@
-import { Injectable, ConflictException, BadRequestException, NotFoundException } from '@nestjs/common';
+import { Injectable, ConflictException, BadRequestException } from '@nestjs/common';
 import { TemplateDao } from '../dao/template.dao';
 import { CreateTemplateDto } from '../dto/create-template.dto';
 import { UpdateTemplateDto } from '../dto/update-template.dto';
@@ -41,7 +41,10 @@ export class TemplateService {
   }
 
   async create(createTemplateDto: CreateTemplateDto, user: any): Promise<EmailTemplate> {
-    const { name, companyId, subject, body, variables } = createTemplateDto;
+    const { name, subject, body, variables } = createTemplateDto;
+
+
+    const companyId = user?.companyId || createTemplateDto.companyId;
 
     // 1. Unique name per company
     const existing = await this.templateDao.findAll({
@@ -60,6 +63,7 @@ export class TemplateService {
 
     return this.templateDao.create({
       ...createTemplateDto,
+      companyId,      // override with token-derived companyId
       createdBy: userId,
       updatedBy: userId,
     } as any);
@@ -89,24 +93,14 @@ export class TemplateService {
   }
 
   async findById(id: number, companyId: number): Promise<EmailTemplate> {
-    const template = await this.templateDao.findById(id);
-
-    // Ensure template belongs to the requested company
-    if (template.companyId !== companyId) {
-      throw new NotFoundException(`Template with ID ${id} not found`);
-    }
-
+    const template = await this.templateDao.findById(id, companyId);
     return template;
   }
 
   async update(id: number, updateTemplateDto: UpdateTemplateDto, user: any): Promise<EmailTemplate> {
-    const companyId = updateTemplateDto.companyId || user?.companyId;
-    const template = await this.templateDao.findById(id);
-
-    // Verify company scope
-    if (companyId && template.companyId !== companyId) {
-      throw new NotFoundException(`Template with ID ${id} not found`);
-    }
+    // Always use companyId from JWT token 
+    const companyId = user?.companyId || 0;
+    const template = await this.templateDao.findById(id, companyId);
 
     // Check duplicate name per company on rename
     if (updateTemplateDto.name && updateTemplateDto.name !== template.name) {
@@ -130,17 +124,13 @@ export class TemplateService {
 
     return this.templateDao.update(id, {
       ...updateTemplateDto,
+      companyId: template.companyId,   // never allow companyId to change on update
       updatedBy: userId,
     });
   }
 
   async delete(id: number, companyId: number): Promise<void> {
-    // Verify ownership before deleting
-    const template = await this.templateDao.findById(id);
-    if (template.companyId !== companyId) {
-      throw new NotFoundException(`Template with ID ${id} not found`);
-    }
-
+    await this.templateDao.findById(id, companyId);
     await this.templateDao.delete(id);
   }
 
