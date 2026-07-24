@@ -4,94 +4,117 @@ import {
   Delete,
   Get,
   Param,
-  Patch,
   Post,
   Put,
+  UseGuards,
+  ParseIntPipe,
 } from '@nestjs/common';
-import { CampaignService } from '../services/campaign.service';
-import { Campaign } from '../models/campaign.model';
 
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
+
+import { CampaignService } from '../services/campaign.service';
+import { CreateCampaignDto } from '../dto/create-campaign.dto';
+import { UpdateCampaignDto } from '../dto/update-campaign.dto';
+import { AuthGuard } from '../shared/guards/auth.guard';
+
+
+@ApiTags('Campaigns')
+@ApiBearerAuth('access-token')
+@UseGuards(AuthGuard)
 @Controller('campaigns')
 export class CampaignController {
-  constructor(private readonly campaignService: CampaignService) {}
 
+  constructor(
+    private readonly campaignService: CampaignService,
+  ) {}
+
+
+  // Create Campaign API
   @Post()
-  async createCampaign(@Body() data: Partial<Campaign>) {
-    return this.campaignService.createCampaign(data);
+  @ApiOperation({
+    summary: 'Create a new campaign',
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'Campaign created successfully',
+  })
+  async createCampaign(
+    @Body() createCampaignDto: CreateCampaignDto,
+  ) {
+    return this.campaignService.createCampaign(
+      createCampaignDto,
+    );
   }
 
+
+  // Get All Campaigns API
   @Get()
+  @ApiOperation({
+    summary: 'Get all campaigns',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Campaigns fetched successfully',
+  })
   async getAllCampaigns() {
     return this.campaignService.getAllCampaigns();
   }
 
+
+  // Get Campaign By ID API
   @Get(':id')
-  async getCampaignById(@Param('id') id: number) {
-    return this.campaignService.getCampaignById(Number(id));
+  @ApiOperation({
+    summary: 'Get campaign by ID',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Campaign fetched successfully',
+  })
+  async getCampaignById(
+    @Param('id', ParseIntPipe) id: number,
+  ) {
+    return this.campaignService.getCampaignById(id);
   }
 
-  @Get('company/:companyId')
-  async getCampaignsByCompanyId(@Param('companyId') companyId: number) {
-    return this.campaignService.getCampaignsByCompanyId(Number(companyId));
-  }
 
-  @Get('active/all')
-  async getActiveCampaigns() {
-    return this.campaignService.getActiveCampaigns();
-  }
-
+  // Update Campaign API
   @Put(':id')
+  @ApiOperation({
+    summary: 'Update campaign by ID',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Campaign updated successfully',
+  })
   async updateCampaign(
-    @Param('id') id: number,
-    @Body() data: Partial<Campaign>,
+    @Param('id', ParseIntPipe) id: number,
+    @Body() updateCampaignDto: UpdateCampaignDto,
   ) {
-    return this.campaignService.updateCampaign(Number(id), data);
-  }
-
-  @Patch(':id/status')
-  async updateCampaignStatus(
-    @Param('id') id: number,
-    @Body('status') status: string,
-  ) {
-    return this.campaignService.updateCampaignStatus(Number(id), status);
-  }
-
-  @Patch(':id/soft-delete')
-  async softDeleteCampaign(@Param('id') id: number) {
-    return this.campaignService.softDeleteCampaign(Number(id));
-  }
-
-  @Delete(':id')
-  async deleteCampaign(@Param('id') id: number) {
-    return this.campaignService.deleteCampaign(Number(id));
-  }
-
-  @Get('exists/:id')
-  async campaignExists(@Param('id') id: number) {
-    return this.campaignService.campaignExists(Number(id));
-  }
-
-  @Get('status/:status')
-  async getCampaignsByStatus(@Param('status') status: string) {
-    return this.campaignService.getCampaignsByStatus(status);
-  }
-
-  @Get('template/:templateId')
-  async getCampaignsByTemplateId(@Param('templateId') templateId: number) {
-    return this.campaignService.getCampaignsByTemplateId(Number(templateId));
-  }
-
-  @Get('email-config/:emailConfigId')
-  async getCampaignsByEmailConfigId(
-    @Param('emailConfigId') emailConfigId: number,
-  ) {
-    return this.campaignService.getCampaignsByEmailConfigId(
-      Number(emailConfigId),
+    return this.campaignService.updateCampaign(
+      id,
+      updateCampaignDto,
     );
   }
 
-  @Get('count/company/:companyId')
-  async countCampaignsByCompanyId(@Param('companyId') companyId: number) {
-    return this.campaignService.countCampaignsByCompanyId(Number(companyId));
+
+  // Delete Campaign API
+  @Delete(':id')
+  @ApiOperation({
+    summary: 'Delete campaign by ID',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Campaign deleted successfully',
+  })
+  async deleteCampaign(
+    @Param('id', ParseIntPipe) id: number,
+  ) {
+    return this.campaignService.deleteCampaign(id);
   }
+
 }
